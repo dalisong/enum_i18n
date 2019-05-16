@@ -7,6 +7,7 @@ module EnumI18n
         Helper.define_attr_i18n_method(self, attr_name)
         Helper.define_collection_i18n_method(self, attr_name)
         Helper.define_options_i18n_method(self, attr_name)
+        Helper.define_options_i18n_code_method(self, attr_name)
       end
     end
 
@@ -54,6 +55,19 @@ module EnumI18n
       def #{options_i18n_method_name}
         collection_array = #{collection_method_name}.collect do |symbol, _|
           [::EnumI18n::Helper.translate_enum_symbol(self, :#{attr_name}, symbol), symbol]
+        end
+        Hash[collection_array].with_indifferent_access
+      end
+      METHOD
+    end      
+    
+    def self.define_options_i18n_code_method(klass, attr_name)
+      collection_method_name = "#{attr_name.to_s.pluralize}"
+      options_i18n_method_name = "#{collection_method_name}_options_i18n_code"
+      klass.instance_eval <<-METHOD, __FILE__, __LINE__
+      def #{options_i18n_method_name}
+        collection_array = #{collection_method_name}.collect do |symbol, _|
+          [::EnumI18n::Helper.translate_enum_symbol(self, :#{attr_name}, symbol), _]
         end
         Hash[collection_array].with_indifferent_access
       end
